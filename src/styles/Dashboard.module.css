@@ -1,0 +1,303 @@
+.container {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  .sidebar {
+    width: 320px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  
+  .logoContainer {
+    padding: 0 20px;
+    margin-bottom: 20px;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .menuHeader {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .menu {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .menuItem {
+    padding: 12px 20px;
+    padding-left: 40px;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .menuItem:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .menuItem.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: 500;
+  }
+  
+  .menuItem.menuHeader {
+    padding-left: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-top: 16px;
+  }
+  
+  .content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+  }
+  
+  .pageTitle {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--primary-color);
+  }
+  
+  .card {
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .searchContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .searchInput {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 300px;
+  }
+  
+  .searchInput input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    width: 100%;
+  }
+  
+  .sortDropdown {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .sortDropdown select {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  
+  .pageButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: var(--white);
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  
+  .pageButton:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+  
+  .pageButton.active {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+  }
+  
+  .pageButton.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .tableContainer {
+    overflow-x: auto;
+  }
+  
+  .actionButton {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  
+  .actionButton.primary {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+  }
+  
+  .actionButton.primary:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  .actionButton.secondary {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+  }
+  
+  .actionButton.secondary:hover {
+    background-color: rgba(255, 59, 48, 0.05);
+  }
+  
+  .chatContainer {
+    display: flex;
+    height: 600px;
+    gap: 24px;
+  }
+  
+  .chatSidebar {
+    width: 300px;
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+  }
+  
+  .chatList {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chatItem {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .chatItem:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  
+  .chatItem.active {
+    background-color: rgba(255, 59, 48, 0.05);
+    border-left: 3px solid var(--primary-color);
+  }
+  
+  .chatMain {
+    flex: 1;
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chatHeader {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .chatMessages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .message {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  .message.sent {
+    align-self: flex-end;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-top-right-radius: 0;
+  }
+  
+  .message.received {
+    align-self: flex-start;
+    background-color: #f0f0f0;
+    border-top-left-radius: 0;
+  }
+  
+  .chatInput {
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 12px;
+  }
+  
+  .chatInput input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+  }
+  
+  .chatInput button {
+    padding: 0 16px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+  }
