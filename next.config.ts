@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
         hostname: 'shipchic.oldk.dev',  
       },
       {
+        protocol: 'https',
+        hostname: 'admin-shipchic.oldk.dev',  
+      },
+      {
         protocol: 'http',
         hostname: 'localhost', 
         port: '3001',
