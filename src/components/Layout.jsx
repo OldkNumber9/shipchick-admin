@@ -16,16 +16,16 @@ export default function Layout({ children, title }) {
       </Head>
 
       <Sidebar 
-      className="sticky top-0 h-screen "
-    style={{
-      backgroundImage: "url(/Sidebar-A-bg.png)",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    }}
+      className="sticky top-0 h-screen z-50 "
+        style={{
+          backgroundImage: "url(/Sidebar-A-bg.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
     />
 
       <main className="flex-1 p-6">
-        <h1 className="text-3xl font-bold text-red-600 mb-6">{title}</h1>
+        <h1 className="text-3xl font-bold text-red-600 mb-6">{title}</h1> 
         {children}
       </main>
     </div>

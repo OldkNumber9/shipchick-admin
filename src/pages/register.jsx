@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import AuthService from "@/services/auth.service"
 
-export default function Login() {
+export default function Register() {
   const router = useRouter()
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -17,33 +18,51 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!email || !password) {
-      setError("Please enter both email and password")
+    if (!name || !email || !password) {
+      setError("Please fill in all fields")
       return
     }
 
     try {
-      await AuthService.login({ email, password })
-      router.push("/dashboard")
+      await AuthService.register(
+        {
+            email: email,
+            password: password,
+            username: name,
+        }
+      )
+      router.push("/login")
     } catch (err) {
-      setError("Invalid email or password")
+      setError("Registration failed. Please try again.")
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Head>
-        <title>Login | ShipChic Admin</title>
-        <meta name="description" content="ShipChic Admin Dashboard Login" />
+        <title>Register | ShipChic Admin</title>
+        <meta name="description" content="ShipChic Admin Registration" />
         <link rel="icon" href="/favicon.ico" />
-      </Head> 
+      </Head>
 
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-2xl font-bold text-red-600 mb-6 text-center">LOGIN</h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-6 text-center">REGISTER</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
+
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your Name"
+                className="bg-gray-50"
+              />
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -55,7 +74,6 @@ export default function Login() {
                 placeholder="admin@byewind.com"
                 className="bg-gray-50"
               />
-              <p className="text-sm text-gray-500">Enter your admin email</p>
             </div>
 
             <div className="space-y-2">
@@ -68,20 +86,11 @@ export default function Login() {
                 placeholder="••••••••"
                 className="bg-gray-50"
               />
-              <p className="text-sm text-gray-500">Enter your password</p>
             </div>
 
             <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">
-              Login
+              Register
             </Button>
-
-            {/* link to register */}
-            <div className="text-center mt-4 text-sm text-gray-600">
-              Don't have an account?{" "}
-              <a href="/register" className="text-red-600 hover:underline">
-                Register here
-              </a>
-            </div>
           </form>
         </div>
       </div>

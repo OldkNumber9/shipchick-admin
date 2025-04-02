@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Layout from "@/components/Layout"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -10,52 +10,46 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Search, Plus, Edit, Trash } from "lucide-react"
 
+import { getRoutes, createRoute, updateRoute } from "@/services/route.service"
+import { Route } from "@/types/route"
+
 export default function PriceFee() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [routes, setRoutes] = useState<Route[]>([])
+  const [form, setForm] = useState<Partial<Route>>({})
+  const [page, setPage] = useState(1)
+  const [limit] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+  const [editId, setEditId] = useState<string | null>(null)
 
-  // Sample data for routes
-  const routes = [
-    {
-      id: 1,
-      route: "BKK > PEK",
-      description: "THAILAND to CHINA",
-      price: "B 400.00",
-      gst: "7 %",
-      additionalFees: "n/a",
-      total: "B 428.00",
-      lastUpdate: "24 Oct, 2015 Super Admin",
-    },
-    {
-      id: 2,
-      route: "PEK > BKK",
-      description: "CHINA to THAILAND",
-      price: "B 400.00",
-      gst: "7 %",
-      additionalFees: "n/a",
-      total: "B 428.00",
-      lastUpdate: "24 Oct, 2015 Super Admin",
-    },
-    {
-      id: 3,
-      route: "BKK > LHR",
-      description: "THAILAND to ENGLAND",
-      price: "B 650.00",
-      gst: "7 %",
-      additionalFees: "n/a",
-      total: "B 695.50",
-      lastUpdate: "24 Oct, 2015 Super Admin",
-    },
-    {
-      id: 4,
-      route: "LHR > BKK",
-      description: "ENGLAND to THAILAND",
-      price: "B 650.00",
-      gst: "7 %",
-      additionalFees: "n/a",
-      total: "B 695.50",
-      lastUpdate: "24 Oct, 2015 Super Admin",
-    },
-  ]
+  const fetchRoutes = async () => {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) })
+    const res = await getRoutes(params)
+    setRoutes(res.data)
+    setTotalPages(res.totalPages)
+  }
+
+  useEffect(() => {
+    fetchRoutes()
+  }, [page])
+
+  const handleSubmit = async () => {
+    if (editId) {
+      await updateRoute(editId, form)
+    } else {
+      await createRoute(form)
+    }
+    setForm({})
+    setEditId(null)
+    setIsDialogOpen(false)
+    fetchRoutes()
+  }
+
+  const handleEdit = (route: Route) => {
+    setForm(route)
+    setEditId(route._id || null)
+    setIsDialogOpen(true)
+  }
 
   return (
     <Layout title="PRICE & FEES">
@@ -69,18 +63,6 @@ export default function PriceFee() {
           <Button onClick={() => setIsDialogOpen(true)} className="bg-red-600 hover:bg-red-700">
             <Plus size={16} className="mr-2" /> Add Route
           </Button>
-
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-              <SelectItem value="price-asc">Price: Low to High</SelectItem>
-              <SelectItem value="price-desc">Price: High to Low</SelectItem>
-            </SelectContent>
-          </Select>
 
           <Button variant="outline">Saved search</Button>
         </div>
@@ -100,18 +82,18 @@ export default function PriceFee() {
           </TableHeader>
           <TableBody>
             {routes.map((route) => (
-              <TableRow key={route.id}>
+              <TableRow key={route._id}>
                 <TableCell>
-                  <div className="font-medium">{route.route}</div>
-                  <div className="text-sm text-gray-500">{route.description}</div>
+                  <div className="font-medium">{route.originAirport} &gt; {route.destinationAirport}</div>
+                  <div className="text-sm text-gray-500">{route.originCountry} to {route.destinationCountry}</div>
                 </TableCell>
-                <TableCell>{route.price}</TableCell>
-                <TableCell>{route.gst}</TableCell>
-                <TableCell>{route.additionalFees}</TableCell>
-                <TableCell>{route.lastUpdate}</TableCell>
+                <TableCell>{route.pricePerKg}</TableCell>
+                <TableCell>{route.gstPercent ?? 0}</TableCell>
+                <TableCell>{route.additionalFees ?? 0}</TableCell>
+                <TableCell>{route.updatedAt?.split("T")[0]}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(route)}>
                       <Edit size={16} />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -125,90 +107,65 @@ export default function PriceFee() {
         </Table>
       </div>
 
+      <div className="flex justify-end mt-4 gap-2">
+        <Button disabled={page <= 1} onClick={() => setPage(page - 1)}>Prev</Button>
+        <span className="self-center">Page {page} of {totalPages}</span>
+        <Button disabled={page >= totalPages} onClick={() => setPage(page + 1)}>Next</Button>
+      </div>
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Add Route</DialogTitle>
+            <DialogTitle>{editId ? 'Edit' : 'Add'} Route</DialogTitle>
           </DialogHeader>
 
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="countryOrigins">Country Origins</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="thailand">Thailand</SelectItem>
-                  <SelectItem value="china">China</SelectItem>
-                  <SelectItem value="england">England</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Country Origins</Label>
+              <Input value={form.originCountry || ''} onChange={(e) => setForm({ ...form, originCountry: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="airportOrigins">Airport Origins</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Airport" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bkk">BKK - Suvarnabhumi</SelectItem>
-                  <SelectItem value="dmk">DMK - Don Mueang</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Airport Origins</Label>
+              <Input value={form.originAirport || ''} onChange={(e) => setForm({ ...form, originAirport: e.target.value })} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="countryDestination">Country Destination</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="thailand">Thailand</SelectItem>
-                  <SelectItem value="china">China</SelectItem>
-                  <SelectItem value="england">England</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Country Destination</Label>
+              <Input value={form.destinationCountry || ''} onChange={(e) => setForm({ ...form, destinationCountry: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="airportDestination">Airport Destination</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Airport" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pek">PEK - Beijing Capital</SelectItem>
-                  <SelectItem value="lhr">LHR - Heathrow</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Airport Destination</Label>
+              <Input value={form.destinationAirport || ''} onChange={(e) => setForm({ ...form, destinationAirport: e.target.value })} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="pricePerKg">Price / Kg.</Label>
-              <Input id="pricePerKg" placeholder="Price per Kg" />
+              <Label>Price / Kg.</Label>
+              <Input type="number" value={form.pricePerKg || ''} onChange={(e) => setForm({ ...form, pricePerKg: parseFloat(e.target.value) })} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="additionalFees">Addition Fees</Label>
-              <Input id="additionalFees" placeholder="Additional Fees" />
+              <Label>Addition Fees</Label>
+              <Input type="number" value={form.additionalFees || 0} onChange={(e) => setForm({ ...form, additionalFees: parseFloat(e.target.value) })} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="gstVat">GST / VAT (%)</Label>
-              <Input id="gstVat" placeholder="GST / VAT %" />
+              <Label>GST / VAT (%)</Label>
+              <Input type="number" value={form.gstPercent || 0} onChange={(e) => setForm({ ...form, gstPercent: parseFloat(e.target.value) })} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sum">SUM</Label>
-              <Input id="sum" value="1,000.00" readOnly className="bg-gray-100" />
+              <Label>SUM</Label>
+              <Input readOnly className="bg-gray-100" value={
+                form.pricePerKg && form.gstPercent
+                  ? ((form.pricePerKg * (1 + form.gstPercent / 100)) + (form.additionalFees || 0)).toFixed(2)
+                  : ''
+              } />
             </div>
           </div>
 
           <div className="flex justify-end mt-4">
-            <Button className="bg-blue-500 hover:bg-blue-600">Add Route</Button>
+            <Button className="bg-blue-500 hover:bg-blue-600" onClick={handleSubmit}>{editId ? 'Update' : 'Add'} Route</Button>
           </div>
         </DialogContent>
       </Dialog>
     </Layout>
   )
 }
-

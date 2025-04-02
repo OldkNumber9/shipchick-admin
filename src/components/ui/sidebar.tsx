@@ -4,6 +4,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { type VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
+import { NotificationBell } from "@/components/notifications"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -197,6 +198,9 @@ export function Sidebar({ className, ...props }: SidebarProps) {
           <span className="text-red-600 font-bold">S</span>
         </div>
         <span className="font-semibold text-lg">Ship Chic</span>
+        <div className="flex items-center gap-4">
+            <NotificationBell />
+          </div>
       </div>
 
       <div className="px-4 py-2 text-sm text-white/70 uppercase">Dashboards</div>

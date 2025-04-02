@@ -1,94 +1,58 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Layout from "@/components/Layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Search, ChevronDown } from "lucide-react"
 import Image from "next/image"
+import FlightService from "@/services/flight.service"
+import type { Flight } from "@/types/flight"
+import ImageModal from "@/components/ImageModal"
 
-export default function carriersApproval() {
+export default function CarriersApproval() {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState("newest")
   const [currentPage, setCurrentPage] = useState(1)
+  const [flights, setFlights] = useState<Flight[]>([])
+  const [totalPages, setTotalPages] = useState(1)
+  const [selectedImage, setSelectedImage] = useState<{ url: string | null, alt: string }>({ url: null, alt: "" })
 
-  // Sample data for senders
-  const senders = [
-    {
-      id: 1,
-      name: "Jane Cooper",
-      type: "Cloths",
-      weight: "5 Kg.",
-      destination: "KUNMING",
-      status: "Approved",
-    },
-    {
-      id: 2,
-      name: "Floyd Miles",
-      type: "Documents",
-      weight: "5 Kg.",
-      destination: "XIAMEN",
-      status: "Rejected",
-    },
-    {
-      id: 3,
-      name: "Ronald Richards",
-      type: "Electronics",
-      weight: "5 Kg.",
-      destination: "NANJING",
-      status: "Rejected",
-    },
-    {
-      id: 4,
-      name: "Marvin McKinney",
-      type: "Sampling",
-      weight: "5 Kg.",
-      destination: "NANJING",
-      status: "Waiting",
-    },
-    {
-      id: 5,
-      name: "Jerome Bell",
-      type: "Computer",
-      weight: "5 Kg.",
-      destination: "CHONGQING",
-      status: "Waiting",
-    },
-    {
-      id: 6,
-      name: "Kathryn Murphy",
-      type: "Documents",
-      weight: "5 Kg.",
-      destination: "CHONGQING",
-      status: "Approved",
-    },
-    {
-      id: 7,
-      name: "Jacob Jones",
-      type: "Gems",
-      weight: "5 Kg.",
-      destination: "XIAMEN",
-      status: "Approved",
-    },
-    {
-      id: 8,
-      name: "Kristin Watson",
-      type: "Gems",
-      weight: "5 Kg.",
-      destination: "BEIJING",
-      status: "Rejected",
-    },
-  ]
+  
+  const handleImageClick = (url: string | null, alt: string) => {
+    setSelectedImage({ url, alt })
+  }
 
-  const getStatusClass = (status: string) => {
+
+  useEffect(() => {
+    const fetchFlights = async () => {
+      const sortField = sortBy === "newest" ? "createdAt" : sortBy === "oldest" ? "createdAt" : "flightNumber"
+      const sortOrder = sortBy === "oldest" ? "asc" : "desc"
+
+      const res = await FlightService.paginateFlights({
+        page: currentPage,
+        limit: 8,
+        search: searchTerm,
+        sortBy: sortField,
+        sortOrder,
+      })
+
+      setFlights(res.data)
+      setTotalPages(res.meta.lastPage)
+    }
+
+    fetchFlights()
+  }, [searchTerm, sortBy, currentPage])
+
+  const getStatusClass = (status: number) => {
     switch (status) {
-      case "Approved":
-        return "bg-green-100 text-green-800"
-      case "Rejected":
-        return "bg-red-100 text-red-800"
-      case "Waiting":
-        return "bg-gray-200 text-gray-800"
+      case 1:
+        return "bg-green-100 text-green-800" // Approved
+      case -1:
+        return "bg-red-100 text-red-800" // Rejected
+      case 0:
+        return "bg-gray-200 text-gray-800" // Pending
       default:
         return "bg-gray-100 text-gray-800"
     }
@@ -131,35 +95,50 @@ export default function carriersApproval() {
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50">
-              <TableHead>Sender Name</TableHead>
-              <TableHead>Parcel Type</TableHead>
-              <TableHead>Weight</TableHead>
-              <TableHead>Image</TableHead>
-              <TableHead>Destination</TableHead>
+              <TableHead>Flight No.</TableHead>
+              <TableHead>Departure</TableHead>
+              <TableHead>Arrival</TableHead>
+              <TableHead>Passport</TableHead>
+              <TableHead>Boarding Pass</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {senders.map((sender) => (
-              <TableRow key={sender.id}>
-                <TableCell>{sender.name}</TableCell>
-                <TableCell>{sender.type}</TableCell>
-                <TableCell>{sender.weight}</TableCell>
+            {flights.map((flight) => (
+              <TableRow key={flight._id}>
+                <TableCell>{flight.flightNumber}</TableCell>
+                <TableCell>{flight.departureLocation}</TableCell>
+                <TableCell>{flight.arrivalLocation}</TableCell>
                 <TableCell>
-                  <div className="flex gap-1">
-                    <div className="w-10 h-10 bg-gray-100 border rounded-md flex items-center justify-center">
-                      <Image src="/placeholder.svg" alt="Parcel" width={40} height={40} />
-                    </div>
-                    <div className="w-10 h-10 bg-gray-100 border rounded-md flex items-center justify-center">
-                      <Image src="/placeholder.svg" alt="Parcel" width={40} height={40} />
-                    </div>
-                  </div>
+                  {flight.passSportImg ? (
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_API_BASE_URL}profile/${flight.passSportImg}`}
+                      alt="passport"
+                      width={40}
+                      height={40}
+                      onClick={() => handleImageClick(`${process.env.NEXT_PUBLIC_API_BASE_URL}profile/${flight.passSportImg}`, "passport")}
+                    />
+                  ) : (
+                    "-"
+                  )}
                 </TableCell>
-                <TableCell>{sender.destination}</TableCell>
                 <TableCell>
-                  <span className={`px-3 py-1 text-xs rounded-full ${getStatusClass(sender.status)}`}>
-                    {sender.status}
+                  {flight.boardingPassImg ? (
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_API_BASE_URL}profile/${flight.boardingPassImg}`}
+                      alt="boarding"
+                      width={40}
+                      height={40}
+                      onClick={() => handleImageClick(`${process.env.NEXT_PUBLIC_API_BASE_URL}profile/${flight.boardingPassImg}`, "boarding pass")}
+                    />
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
+                <TableCell>
+                  <span className={`px-3 py-1 text-xs rounded-full ${getStatusClass(flight.status)}`}>
+                    {flight.status === 1 ? "Approved" : flight.status === -1 ? "Rejected" : "Pending"}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -173,35 +152,49 @@ export default function carriersApproval() {
         </Table>
 
         <div className="p-4 flex items-center justify-between border-t">
-          <div className="text-sm text-gray-500">Showing data 1 to 8 of 256K entries</div>
+          <div className="text-sm text-gray-500">
+            Showing page {currentPage} of {totalPages} pages
+          </div>
 
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-md" disabled>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0 rounded-md"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
               &lt;
             </Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-md bg-main-purple text-white">
-              1
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-md">
-              2
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-md">
-              3
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-md">
-              4
-            </Button>
-            <span>...</span>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-md">
-              40
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-md">
+            {[...Array(totalPages)].map((_, index) => (
+              <Button
+                key={index + 1}
+                variant="outline"
+                size="sm"
+                className={`h-8 w-8 p-0 rounded-md ${index + 1 === currentPage ? "bg-main-purple text-white" : ""}`}
+                onClick={() => setCurrentPage(index + 1)}
+              >
+                {index + 1}
+              </Button>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0 rounded-md"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
               &gt;
             </Button>
           </div>
         </div>
       </div>
+      <ImageModal
+              imageUrl={selectedImage.url}
+              altText={selectedImage.alt}
+              isOpen={!!selectedImage.url}
+              onClose={() => setSelectedImage({ url: null, alt: "" })}
+            />
     </Layout>
   )
 }
-
