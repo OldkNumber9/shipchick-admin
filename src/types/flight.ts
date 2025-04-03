@@ -1,9 +1,14 @@
+import { Route } from "./route"
+import { User } from "./user"
+
+
 export interface Flight {
   _id: string
   flightNumber: string
-  carrier: any // User object or ID
+  // carrier: any // User object or ID
   approvedBy?: any // Admin object or ID
   status: number // 0: pending, 1: approved, -1: rejected
+  remarks:string
   departureLocation: string
   arrivalLocation: string
   departureDate: Date
@@ -17,5 +22,7 @@ export interface Flight {
   isActive: boolean
   createdAt: Date
   updatedAt: Date
+  route?: Route
+  carrier?:User
 }
 

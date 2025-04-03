@@ -64,13 +64,13 @@ class FlightService {
     await api.delete(`/flights/${id}`)
   }
 
-  async approveFlight(id: string, adminId: string): Promise<Flight> {
-    const response = await api.post(`/flights/${id}/approve`, { adminId })
+  async approveFlight(id: string, remarks: string): Promise<Flight> {
+    const response = await api.post(`/flights/${id}/approve`, { remarks: remarks })
     return response.data
   }
 
-  async rejectFlight(id: string, adminId: string): Promise<Flight> {
-    const response = await api.post(`/flights/${id}/reject`, { adminId })
+  async rejectFlight(id: string, remarks: string): Promise<Flight> {
+    const response = await api.post(`/flights/${id}/reject`, { remarks:remarks })
     return response.data
   }
 

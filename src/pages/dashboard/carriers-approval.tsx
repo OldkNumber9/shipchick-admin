@@ -10,6 +10,9 @@ import Image from "next/image"
 import FlightService from "@/services/flight.service"
 import type { Flight } from "@/types/flight"
 import ImageModal from "@/components/ImageModal"
+import { toast } from "sonner";
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import FlightDetailsDialog from "@/components/FlightDetailsDialog"
 
 export default function CarriersApproval() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -18,6 +21,50 @@ export default function CarriersApproval() {
   const [flights, setFlights] = useState<Flight[]>([])
   const [totalPages, setTotalPages] = useState(1)
   const [selectedImage, setSelectedImage] = useState<{ url: string | null, alt: string }>({ url: null, alt: "" })
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null)
+  const [remarks, setRemarks] = useState("")
+
+  
+  const handleStatusChange = async (flightId: string, status: number) => {
+    if (status === -1 && !remarks.trim()) {
+      toast.error("Please enter a reason before rejecting.")
+      return
+    }
+    if(status === -1 && remarks ==='pending'){
+      toast.error("Please enter a reason before rejecting.")
+      return
+    }
+  
+    try {
+      // const adminId = "your-admin-id" // Replace with real admin ID
+  
+      let updatedFlight
+      if (status === 1) {
+        updatedFlight = await FlightService.approveFlight(flightId,remarks)
+      } else {
+        updatedFlight = await FlightService.rejectFlight(flightId, remarks)
+      }
+  
+      // Optional: Patch remarks separately if needed
+      // if (remarks) {
+      //   await FlightService.updateFlight(flightId, { remarks })
+      // }
+  
+      setFlights((prev) =>
+        prev.map((f) =>
+          f._id === flightId ? { ...f, status, remarks } : f
+        )
+      )
+  
+      setIsModalOpen(false)
+      setSelectedFlight(null)
+      setRemarks("")
+    } catch (err) {
+      console.error("Error updating status:", err)
+    }
+  }
 
   
   const handleImageClick = (url: string | null, alt: string) => {
@@ -142,7 +189,12 @@ export default function CarriersApproval() {
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm"
+                    onClick={() => {
+                      setSelectedFlight(flight)
+                      setRemarks(flight.remarks || "")
+                      setIsModalOpen(true)
+                    }}>
                     View
                   </Button>
                 </TableCell>
@@ -188,7 +240,15 @@ export default function CarriersApproval() {
             </Button>
           </div>
         </div>
-      </div>
+      </div> 
+      <FlightDetailsDialog
+        selectedFlight={selectedFlight}
+        isModalOpen={isModalOpen}
+        setIsModalOpen={() => setIsModalOpen(false)}
+        handleStatusChange={handleStatusChange}
+        remarks={remarks}
+        setRemarks={setRemarks}
+      />
       <ImageModal
               imageUrl={selectedImage.url}
               altText={selectedImage.alt}
